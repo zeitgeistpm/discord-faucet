@@ -1,0 +1,30 @@
+{
+  "name": "@zeitgeistpm/discord-faucet",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@zeitgeistpm/sdk": "^0.1.13",
+    "discord.js": "^12.5.1",
+    "fast-toml": "^0.5.4",
+    "nedb-promises": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.14",
+    "@typescript-eslint/eslint-plugin": "^4.11.0",
+    "@typescript-eslint/parser": "^4.11.0",
+    "eslint": "^7.16.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-prettier": "^3.3.0",
+    "eslint-plugin-security": "^1.4.0",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.3"
+  }
+}
