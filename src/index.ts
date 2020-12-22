@@ -13,7 +13,7 @@ import { isOkAt, getNow, ok } from "./time";
   const client = new Discord.Client();
 
   client.on("ready", () => {
-    console.log("ICH BIN REA/dy");
+    console.log("Discord Faucet v0.1.0 running");
   });
 
   // Create an event listener for messages
