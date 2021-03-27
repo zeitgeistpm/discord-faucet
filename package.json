@@ -11,20 +11,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@zeitgeistpm/sdk": "^0.1.13",
+    "@zeitgeistpm/sdk": "^0.1.32",
     "discord.js": "^12.5.1",
     "fast-toml": "^0.5.4",
-    "nedb-promises": "^4.1.0"
+    "nedb-promises": "^4.1.1"
   },
   "devDependencies": {
-    "@types/node": "^14.14.14",
-    "@typescript-eslint/eslint-plugin": "^4.11.0",
-    "@typescript-eslint/parser": "^4.11.0",
-    "eslint": "^7.16.0",
-    "eslint-config-prettier": "^7.1.0",
-    "eslint-plugin-prettier": "^3.3.0",
+    "@types/node": "^14.14.37",
+    "@typescript-eslint/eslint-plugin": "^4.19.0",
+    "@typescript-eslint/parser": "^4.19.0",
+    "eslint": "^7.23.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-security": "^1.4.0",
     "prettier": "^2.2.1",
-    "typescript": "^4.1.3"
+    "typescript": "^4.2.3"
   }
 }
