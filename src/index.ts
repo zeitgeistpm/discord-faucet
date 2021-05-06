@@ -26,8 +26,9 @@ const bigTeam = "789386070441590816";
         const { id } = message.author;
         const smTeam = await message.guild.roles.fetch(smallTeam);
         const lgTeam = await message.guild.roles.fetch(bigTeam);
+        const isOnTeam = smTeam.members.has(id) || lgTeam.members.has(id);
         let amount = 10 ** 10
-        if (smTeam.members.has(id) || lgTeam.members.has(id)) {
+        if (isOnTeam) {
           const requestedAmount = message.content.split(" ")[2];
           if (!!requestedAmount) {
             amount = Number(requestedAmount) * 10**10;
@@ -43,7 +44,7 @@ const bigTeam = "789386070441590816";
 
         const entry = await db.getUserWithId(message.author.id);
 
-        if (!entry || ok(entry.at)) {
+        if (!entry || ok(entry.at) || isOnTeam) {
           const success = sender.sendTokens(address, (amount).toString());
 
           if (success) {
