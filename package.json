@@ -11,6 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@polkadot/keyring": "^6.3.1",
+    "@polkadot/util": "^6.3.1",
+    "@polkadot/util-crypto": "^6.3.1",
     "@zeitgeistpm/sdk": "^0.1.50",
     "discord.js": "^12.5.3",
     "fast-toml": "^0.5.4",

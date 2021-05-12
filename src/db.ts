@@ -21,4 +21,20 @@ export default class Db {
   ): Promise<{ userId: string; at: number } | null> {
     return await this.store.findOne({ userId });
   }
+
+  // KSM Extension
+  async saveOrUpdateKSMAddress(ksmAddress: string, done: boolean): Promise<boolean> {
+    const doc = await this.store.findOne({ ksmAddress });
+    if (!doc) {
+      return !!(await this.store.insert({ ksmAddress, done }));
+    } else {
+      return !!(await this.store.update({ ksmAddress }, { $set: { done } }));
+    }
+  }
+
+  async getKSMAddress(
+    ksmAddress: string,
+  ): Promise<{ ksmAddress: string, done: boolean } | null> {
+    return await this.store.findOne({ ksmAddress });
+  }
 }
