@@ -130,7 +130,7 @@ const bigTeam = "789386070441590816";
           return;
         } else {
           message.channel.send(
-            `You already requested ZBP within the last 36 hours, ${
+            `You already requested ZBP within the last 24 hours, ${
               message.author.username
             }! You can request again at ${isOkAt(entry.at).toUTCString()}.`
           );
