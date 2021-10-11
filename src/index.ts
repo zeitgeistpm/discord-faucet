@@ -60,8 +60,8 @@ const bigTeam = "789386070441590816";
           return;
         }
 
-        const hasNFT = await axios(`https://rmrk-check.zeitgeist.pm/valid/${address}`);
-        if (!hasNFT) {
+        const { data } = await axios(`https://rmrk-check.zeitgeist.pm/valid/${address}`);
+        if (!data) {
           message.channel.send(
             `Sorry ${message.author.username} but I didn't find a NFT at this wallet address 😕`
           );
