@@ -20,11 +20,11 @@ export default class Sender {
         .transfer(dest, amount)
         .signAndSend(this.keypair, ({ events = [], status }) => {
           if (status.isInBlock) {
-            events.forEach(({ event: { method, section } }) => {
-              console.log(method, section);
-              if (section === "System" && method === "ExtrinsicSuccess") {
+            events.forEach(({ event: { data, method, section } }) => {
+              if (section === "system" && method === "ExtrinsicSuccess") {
+                console.log(data.toString());
                 resolve(true);
-              } else if (section === "System" && method === "ExtrinsicFailed") {
+              } else if (section === "system" && method === "ExtrinsicFailed") {
                 resolve(false);
               }
             });
