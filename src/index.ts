@@ -71,7 +71,7 @@ const bigTeam = "789386070441590816";
         const entry = await db.getUserWithId(message.author.id);
 
         if (!entry || ok(entry.at) || isOnTeam) {
-          const success = sender.sendTokens(checkedAddress, (amount).toString());
+          const success = await sender.sendTokens(checkedAddress, (amount).toString());
 
           if (success) {
             await db.saveOrUpdateUser(message.author.id, getNow());
