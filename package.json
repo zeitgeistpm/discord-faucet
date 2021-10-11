@@ -14,7 +14,7 @@
     "@polkadot/keyring": "^7.4.1",
     "@polkadot/util": "^6.3.1",
     "@polkadot/util-crypto": "^6.3.1",
-    "@zeitgeistpm/sdk": "^0.1.50",
+    "@zeitgeistpm/sdk": "0.3.4",
     "axios": "^0.21.1",
     "discord.js": "^12.5.3",
     "fast-toml": "^0.5.4",
