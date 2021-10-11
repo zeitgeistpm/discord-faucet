@@ -1,11 +1,21 @@
+import { encodeAddress, decodeAddress } from "@polkadot/keyring";
+import axios from "axios";
 import Discord from "discord.js";
 
 import { readConfig } from "./config";
 import Db from "./db";
-import { readDataFile, sigVerify } from "./ksmBalanceExtension";
 import Sender from "./sender";
 import { isOkAt, getNow, ok } from "./time";
-import * as Util from "@polkadot/util";
+
+const checkAddress = (address): string | false => {
+  try {
+    const raw = decodeAddress(address);
+    return encodeAddress(raw, 73);
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
 
 // Discord role id for the "Team"
 const smallTeam = "817442510854946816";
@@ -19,78 +29,17 @@ const bigTeam = "789386070441590816";
 
   const client = new Discord.Client();
 
-  const data = readDataFile('./data_final.csv');
-
   client.on("ready", () => {
     console.log("Discord Faucet v0.1.0 running");
   });
 
   // Create an event listener for messages
   client.on("message", async (message) => {
-    // KSM extension
-    // !claim <ztg_address> <ksm_address> <signature>
-    if (message.content.startsWith("!claim")) {
-      if (message.channel.id == config.discord.channel_id) {
-        const [,ztgAddress, ksmAddress, signature] = message.content.split(" ");
-        if (!ztgAddress || !ksmAddress || !signature) {
-          message.channel.send(
-            `Usage: !claim <ztg_address> <ksm_address> <signature>`,
-          );
-          return;
-        }
-
-        let isValid;
-        try {
-          isValid = sigVerify(ztgAddress, signature, ksmAddress);
-        } catch (e) {
-          message.channel.send(
-            "Provided input is not valid, cannot attempt signature verification",
-          );
-          return;
-        }
-
-        if (!isValid) {
-          message.channel.send(
-            `I'm sorry ${message.author.username}, but this is not a valid signature 😕`
-          );
-          return;
-        }
-
-        const dbItem = await db.getKSMAddress(ksmAddress);
-
-        if (dbItem && dbItem.done) {
-          message.channel.send(
-            `This KSM address has already been used to claim ZBP`
-          );
-          return;
-        }
-
-        const entry = data.find((e) => e[0] === ksmAddress);
-        if (!entry) {
-          message.channel.send(
-            'This KSM address did not have a balance when snapshot was taken!'
-          );
-          return;
-        }
-
-        const amount = Util.bnToBn(entry[1]).div(Util.bnToBn(100));
-        const success = sender.sendTokens(ztgAddress, (amount).toString());
-
-        if (success) {
-          await db.saveOrUpdateKSMAddress(ksmAddress, true);
-
-          message.channel.send(
-            `Sent ${amount.div(Util.bnToBn(10**10)).toString()} ZBP to ${message.author.username}! 🎉`
-          );
-
-          return;
-        }
-      }
-    }
-
     if (message.content.startsWith("!drip")) {
       if (message.channel.id == config.discord.channel_id) {
         const { id } = message.author;
+
+        console.log(message.author)
         const smTeam = await message.guild.roles.fetch(smallTeam);
         const lgTeam = await message.guild.roles.fetch(bigTeam);
         const isOnTeam = smTeam.members.has(id) || lgTeam.members.has(id);
@@ -102,9 +51,19 @@ const bigTeam = "789386070441590816";
           }
         }
         const address = message.content.split(" ")[1];
-        if (!address || !address.startsWith("5") || address.length !== 48) {
+        const checkedAddress = checkAddress(address);
+
+        if (!checkedAddress) {
           message.channel.send(
             `I don't understand this address, ${message.author.username}... 😕`
+          );
+          return;
+        }
+
+        const hasNFT = await axios(`https://rmrk-check.zeitgeist.pm/valid/${address}`);
+        if (!hasNFT) {
+          message.channel.send(
+            `Sorry ${message.author.username} but I didn't find a NFT at this wallet address 😕`
           );
           return;
         }
@@ -112,14 +71,14 @@ const bigTeam = "789386070441590816";
         const entry = await db.getUserWithId(message.author.id);
 
         if (!entry || ok(entry.at) || isOnTeam) {
-          const success = sender.sendTokens(address, (amount).toString());
+          const success = sender.sendTokens(checkedAddress, (amount).toString());
 
           if (success) {
             await db.saveOrUpdateUser(message.author.id, getNow());
 
             console.log(amount);
             message.channel.send(
-              `Sent ${amount / 10**10} ZBP to ${message.author.username}! 🎉`
+              `Sent ${amount / 10**10} ZBS to ${message.author.username}! 🎉`
             );
           } else {
             message.channel.send(
@@ -130,7 +89,7 @@ const bigTeam = "789386070441590816";
           return;
         } else {
           message.channel.send(
-            `You already requested ZBP within the last 24 hours, ${
+            `You already requested ZBS within the last 24 hours, ${
               message.author.username
             }! You can request again at ${isOkAt(entry.at).toUTCString()}.`
           );

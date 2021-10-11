@@ -1,6 +1,6 @@
 {
   "name": "@zeitgeistpm/discord-faucet",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -11,10 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@polkadot/keyring": "^6.3.1",
+    "@polkadot/keyring": "^7.4.1",
     "@polkadot/util": "^6.3.1",
     "@polkadot/util-crypto": "^6.3.1",
     "@zeitgeistpm/sdk": "^0.1.50",
+    "axios": "^0.21.1",
     "discord.js": "^12.5.3",
     "fast-toml": "^0.5.4",
     "nedb-promises": "^4.1.3"
