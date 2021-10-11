@@ -21,6 +21,7 @@ export default class Sender {
         .signAndSend(this.keypair, ({ events = [], status }) => {
           if (status.isInBlock) {
             events.forEach(({ event: { method, section } }) => {
+              console.log(method, section);
               if (section === "System" && method === "ExtrinsicSuccess") {
                 resolve(true);
               } else if (section === "System" && method === "ExtrinsicFailed") {
