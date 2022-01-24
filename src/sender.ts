@@ -9,8 +9,8 @@ export default class Sender {
     this.keypair = util.signerFromSeed(seed);
   }
 
-  static async create(seed: string): Promise<Sender> {
-    const sdk = await SDK.initialize();
+  static async create(endpoint: string, seed: string): Promise<Sender> {
+    const sdk = await SDK.initialize(endpoint);
     return new Sender(sdk, seed);
   }
 

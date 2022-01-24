@@ -10,6 +10,7 @@ export type Config = {
     token: string;
   };
   sender: {
+    endpoint: string;
     seed: string;
   };
 };

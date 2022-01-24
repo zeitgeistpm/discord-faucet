@@ -25,7 +25,7 @@ const bigTeam = "789386070441590816";
 (async () => {
   const config = readConfig();
   const db = new Db(config.database.path);
-  const sender = await Sender.create(config.sender.seed);
+  const sender = await Sender.create(config.sender.endpoint, config.sender.seed);
 
   const client = new Discord.Client();
 
