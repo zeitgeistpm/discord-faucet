@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  discord-faucet:
+    container_name: discord-faucet
+    build: .
+    image: discord-faucet
+    restart: on-failure
+    volumes: 
+    - ${PWD}/config.toml:/discord-faucet/config.toml
+    command: yarn start
