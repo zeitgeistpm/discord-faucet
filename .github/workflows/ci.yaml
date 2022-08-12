@@ -1,0 +1,95 @@
+name: discord-faucet CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    tags: [ '*' ]
+
+env:
+  IMAGE_NAME: discord-faucet
+
+jobs:
+  hadolint:
+    runs-on: ubuntu-20.04
+    name: "Hadolint"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jbergstroem/hadolint-gh-action@v1
+
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ciiiii/toml-editor@1.0.0
+
+      - name: Prepare config.toml File
+        run: cp config.toml.template config.toml
+
+      - name: Edit Config.toml File Database Path
+        with:
+          file: "config.toml"
+          key: "database.path"
+          value: ${{ secrets.DATABASE_PATH }}
+
+      - name: Edit Config.toml File Discord Channel
+        with:
+          file: "config.toml"
+          key: "discord.channel_id"
+          value: ${{ secrets.DISCORD_CHANNEL_ID }}
+
+      - name: Edit Config.toml File Discord Token
+        with:
+          file: "config.toml"
+          key: "discord.token"
+          value: ${{ secrets.DISCORD_TOKEN }}
+
+      - name: Edit Config File Sender Endpoint
+        with:
+          file: "config.toml"
+          key: "sender.endpoint"
+          value: ${{ secrets.SENDER_ENDPOINT }}
+
+      - name: Edit Config File Sender Seed
+        with:
+          file: "config.toml"
+          key: "sender.seed"
+          value: ${{ secrets.SENDER_SEED }}
+      
+      - name: Copy File via SSH to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "config.toml"
+          target: "~/discord-faucet"
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      
+      - name: Build and publish
+        run: |
+          # If it is a tag:
+          if [ -z "${GITHUB_REF##refs/tags/*}" ] ; then
+            ./scripts/docker-hub-publish.sh ${GITHUB_REF#refs/tags/}
+          else
+            ./scripts/docker-hub-publish.sh ${GITHUB_SHA}
+          fi
+    
