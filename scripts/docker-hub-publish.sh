@@ -7,6 +7,6 @@ if [[ -z "$1" ]] ; then
     exit 1
 fi
 
-docker build . -t zeitgeistpm/discord-faucet:$1 -t zeitgeistpm/discord-faucet:latest
+docker build ./base -t zeitgeistpm/discord-faucet:$1 -t zeitgeistpm/discord-faucet:latest
 docker push zeitgeistpm/discord-faucet:$1
 docker push zeitgeistpm/discord-faucet:latest
