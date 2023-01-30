@@ -22,10 +22,22 @@ export default class Sender {
           if (status.isInBlock) {
             events.forEach(({ event: { data, method, section } }) => {
               if (section === "system" && method === "ExtrinsicSuccess") {
-                console.log(data.toString());
+                console.log(`Successfully sent ${amount} to ${dest}!`);
                 resolve(true);
               } else if (section === "system" && method === "ExtrinsicFailed") {
-                resolve(false);
+                console.log(`Failed to send ${amount} to ${dest}!`);
+                const { index, error } = data.toJSON()[0].module;
+                try {
+                  const { errorName, documentation } = this.sdk.errorTable.getEntry(
+                    index,
+                    parseInt(error.substring(2, 4), 16)
+                  );
+                  console.log(`${errorName}: ${documentation}`);
+                } catch (err) {
+                  console.log(err);
+                } finally {
+                  resolve(false);
+                }
               }
             });
 
