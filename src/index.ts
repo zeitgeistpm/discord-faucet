@@ -43,7 +43,7 @@ const bigTeam = "789386070441590816";
         const smTeam = await message.guild.roles.fetch(smallTeam);
         const lgTeam = await message.guild.roles.fetch(bigTeam);
         const isOnTeam = smTeam.members.has(id) || lgTeam.members.has(id);
-        let amount = 10 ** 10
+        let amount = 10 ** 11
         if (isOnTeam) {
           const requestedAmount = message.content.split(" ")[2];
           if (!!requestedAmount) {
@@ -76,7 +76,7 @@ const bigTeam = "789386070441590816";
           if (success) {
             await db.saveOrUpdateUser(message.author.id, getNow());
 
-            console.log(amount);
+            //console.log(amount);
             message.channel.send(
               `Sent ${amount / 10**10} ZBS to ${message.author.username}! 🎉`
             );
