@@ -17,6 +17,7 @@
     "@zeitgeistpm/sdk": "1.0.1",
     "axios": "^0.21.1",
     "discord.js": "^12.5.3",
+    "dotenv": "^16.4.1",
     "fast-toml": "^0.5.4",
     "nedb-promises": "^4.1.3"
   },
