@@ -21,9 +21,11 @@ const checkAddress = (address): string | false => {
   const config = readConfig('main-config.toml');
   const db = new Db(config.database.path);
   const sender = await Sender.create(config.sender.endpoint, config.sender.seed);
-  const activeCodes = process.env.codes?.split(',');
-
   const client = new Discord.Client();
+
+  const activeCodes = process.env.codes?.split(',');
+  const amount = 10 ** 10;
+  let isProcessing = false;
 
   client.on('ready', () => {
     console.log('KingOfCoins is online!');
@@ -33,7 +35,7 @@ const checkAddress = (address): string | false => {
   client.on('message', async (message) => {
     if (message.content.startsWith('!ser')) {
       if (message.channel.id == config.discord.channel_id) {
-        console.log(message.author);
+        console.log(`Received "${message.content.slice(5)}" from ${message.author.username}`);
 
         const address = message.content.split(' ')[1];
         const checkedAddress = checkAddress(address);
@@ -50,14 +52,19 @@ const checkAddress = (address): string | false => {
 
         const entry = await db.getCode(promocode);
         if (!entry) {
-          const amount = 10 ** 10;
+          if (isProcessing) return;
+          else isProcessing = true;
+
           const success = await sender.sendTokens(checkedAddress, amount.toString());
           if (success) {
             await db.saveOrUpdateCode(promocode, address);
-            message.channel.send(`Sent ${amount / 10 ** 10} ZBS to ${message.author.username}! 🎉`);
+            message.channel.send(
+              `Sent ${amount / 10 ** 10} ZBS to ${message.author.username} against ${promocode}! 🎉`
+            );
           } else {
             message.channel.send(`Sorry, something went wrong! Please try again...`);
           }
+          isProcessing = false;
         } else {
           message.channel.send(`Promocode already used! 💼`);
         }
