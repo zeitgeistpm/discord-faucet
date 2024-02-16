@@ -23,7 +23,7 @@ const smallTeam = "817442510854946816";
 const bigTeam = "789386070441590816";
 
 (async () => {
-  const config = readConfig();
+  const config = readConfig('config.toml');
   const db = new Db(config.database.path);
   const sender = await Sender.create(config.sender.endpoint, config.sender.seed);
 
