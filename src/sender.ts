@@ -15,6 +15,7 @@ export default class Sender {
   }
 
   async sendTokens(dest: string, amount: string): Promise<boolean> {
+    console.log(`Processing ${amount} for ${dest}`)
     return new Promise(async (resolve) => {
       const unsub = await this.sdk.api.tx.balances
         .transfer(dest, amount)
@@ -22,7 +23,7 @@ export default class Sender {
           if (status.isInBlock) {
             events.forEach(({ event: { data, method, section } }) => {
               if (section === "system" && method === "ExtrinsicSuccess") {
-                console.log(`Successfully sent ${amount} to ${dest}!`);
+                console.log(`Successfully sent ${amount} to ${dest}`);
                 resolve(true);
               } else if (section === "system" && method === "ExtrinsicFailed") {
                 console.log(`Failed to send ${amount} to ${dest}!`);
