@@ -21,6 +21,6 @@ COPY --from=builder dist dist
 
 FROM discord-faucet AS mainnet-faucet
 ADD main-config.toml .
-ADD main-faucet.db .
+ADD *main-faucet.db .
 ADD .env .
 CMD ["yarn",  "start:main"]
