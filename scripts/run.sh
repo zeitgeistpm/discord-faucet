@@ -1,7 +1,7 @@
 #!/bin/sh
 
-echo "Building mainnet-faucet..."
-docker build . --target mainnet-faucet -t mainnet-faucet
+echo "Building main-faucet..."
+docker build . --target main-faucet -t main-faucet
 
-echo "Starting mainnet-faucet..."
-docker run -d --name=mainnet-faucet mainnet-faucet
+echo "Starting main-faucet..."
+docker run -d --name=main-faucet main-faucet

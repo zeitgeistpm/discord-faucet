@@ -19,7 +19,7 @@ COPY --from=deps yarn.lock .
 COPY --from=deps node_modules node_modules
 COPY --from=builder dist dist
 
-FROM discord-faucet AS mainnet-faucet
+FROM discord-faucet AS main-faucet
 ADD main-config.toml .
 ADD *main-faucet.db .
 ADD .env .
