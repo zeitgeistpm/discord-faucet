@@ -3,7 +3,7 @@
 echo "Copying database to local..."
 docker cp main-faucet:main-faucet.db main-faucet.db
 
-echo "Removing main-faucet..."
+echo "Removing old build..."
 docker rm -f main-faucet
 
 echo "Building main-faucet..."
