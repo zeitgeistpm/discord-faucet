@@ -41,6 +41,8 @@ const checkAddress = (address): string | false => {
       message.delete();
       return;
     }
+
+    // Message is eligible for further checks
     console.log(`Received "${message.content.slice(5)}" from ${message.author.username}`);
 
     // Validate address
