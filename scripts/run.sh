@@ -1,13 +1,22 @@
 #!/bin/sh
 
-echo "Copying database to local..."
-docker cp main-faucet:main-faucet.db main-faucet.db
+__usage="
+Usage: sh ./scripts/run.sh <network>
 
-echo "Removing old build..."
-docker rm -f main-faucet
+Options for <network>:
+  test        To run faucet for ZBS
+  main        To run faucet for ZTG
+"
 
-echo "Building main-faucet..."
-docker build . --target main-faucet -t main-faucet
-
-echo "Starting main-faucet..."
-docker run -d --name=main-faucet main-faucet
+if [ "$1" = "test" ] || [ "$1" = "main" ]; then
+  echo "Copying database to local..."
+  docker cp $1-faucet:$1-faucet.db $1-faucet.db
+  echo "Removing old build..."
+  docker rm -f $1-faucet
+  echo "Building faucet..."
+  docker build . --target $1-faucet -t $1-faucet
+  echo "Starting faucet..."
+  docker run -d --name=$1-faucet $1-faucet
+else
+  echo "$__usage"
+fi

@@ -13,13 +13,19 @@ ADD package.json .
 ADD yarn.lock .
 RUN yarn install --frozen-lockfile
 
-FROM node AS discord-faucet
+FROM node AS faucet
 COPY --from=deps package.json .
 COPY --from=deps yarn.lock .
 COPY --from=deps node_modules node_modules
 COPY --from=builder dist dist
 
-FROM discord-faucet AS main-faucet
+FROM faucet AS test-faucet
+ADD test-config.toml .
+ADD *test-faucet.db .
+ADD .env .
+CMD ["yarn",  "start:test"]
+
+FROM faucet AS main-faucet
 ADD main-config.toml .
 ADD *main-faucet.db .
 ADD .env .
