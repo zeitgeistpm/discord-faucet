@@ -1,4 +1,4 @@
-import Nedb from "nedb-promises";
+import Nedb from 'nedb-promises';
 
 export default class Db {
   private store: Nedb;
@@ -16,10 +16,21 @@ export default class Db {
     }
   }
 
-  async getUserWithId(
-    userId: string
-  ): Promise<{ userId: string; at: number } | null> {
+  async getUserWithId(userId: string): Promise<{ userId: string; at: number } | null> {
     return await this.store.findOne({ userId });
+  }
+
+  async saveOrUpdateCode(code: string, address: string): Promise<boolean> {
+    const doc = await this.store.findOne({ code });
+    if (!doc) {
+      return !!(await this.store.insert({ code, address }));
+    } else {
+      return !!(await this.store.update({ code }, { $set: { address } }));
+    }
+  }
+
+  async getCode(code: string): Promise<{ address: string } | null> {
+    return await this.store.findOne({ code });
   }
 
   // KSM Extension
@@ -32,9 +43,7 @@ export default class Db {
     }
   }
 
-  async getKSMAddress(
-    ksmAddress: string,
-  ): Promise<{ ksmAddress: string, done: boolean } | null> {
+  async getKSMAddress(ksmAddress: string): Promise<{ ksmAddress: string; done: boolean } | null> {
     return await this.store.findOne({ ksmAddress });
   }
 }

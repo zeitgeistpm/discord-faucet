@@ -15,7 +15,7 @@ export type Config = {
   };
 };
 
-export const readConfig = (configPath = "config.toml") => {
+export const readConfig = (configPath: string) => {
   const content = fs.readFileSync(configPath, { encoding: "utf-8" });
   return TOML.parse(content) as Config;
 };
