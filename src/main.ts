@@ -23,8 +23,16 @@ const checkAddress = (address): string | false => {
   const sender = await Sender.create(config.sender.endpoint, config.sender.seed);
   const client = new Discord.Client();
 
-  const activeCodes = process.env.codes?.split(',');
-  const amount = 10 ** 10;
+  const storedCodes = process.env.codes?.split(',');
+  const activeCodes = [];
+  const activeSalts = [];
+  await Promise.all(
+    storedCodes.map(async (code) => {
+      activeCodes.push(code.substring(0, code.indexOf('+')));
+      activeSalts.push(code.substring(code.indexOf('+') + 1));
+    })
+  );
+
   let isProcessing = false;
 
   client.on('ready', () => {
@@ -35,6 +43,7 @@ const checkAddress = (address): string | false => {
   client.on('message', async (message) => {
     // Validate channel
     if (message.channel.id !== config.discord.channel_id) return;
+    // Do not self-process messages
     if (message.author.id === '1205221932740386896') return;
 
     // Validate message pattern
@@ -56,7 +65,8 @@ const checkAddress = (address): string | false => {
 
     // Verify promocode
     const promocode = message.content.split(' ')[2];
-    if (!activeCodes.includes(promocode)) {
+    const index = activeCodes.indexOf(promocode);
+    if (index === -1) {
       message.channel.send(`Invalid promocode, ${message.author.username}... 😕`);
       return;
     }
@@ -73,6 +83,7 @@ const checkAddress = (address): string | false => {
     if (isProcessing) return;
 
     isProcessing = true; // Lock polkadot-api
+    const amount = Number(activeSalts[index]) * 10 ** 10;
     const success = await sender.sendTokens(checkedAddress, amount.toString());
     isProcessing = false; // Release polkadot-api
 
@@ -83,7 +94,7 @@ const checkAddress = (address): string | false => {
     }
 
     // Add code redemption entry in db
-    await db.saveOrUpdateCode(promocode, address);
+    await db.saveOrUpdateCode(promocode, address, amount.toString());
     message.channel.send(`Sent ${amount / 10 ** 10} ZBS to ${message.author.username} against ${promocode}! 🎉`);
     return;
   });
