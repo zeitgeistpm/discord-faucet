@@ -35,9 +35,10 @@ const checkAddress = (address): string | false => {
   client.on('message', async (message) => {
     // Validate channel
     if (message.channel.id !== config.discord.channel_id) return;
+    if (message.author.id === '1205221932740386896') return;
 
     // Validate message pattern
-    if (!message.content.startsWith('!ser')) {
+    if (!message.content.startsWith('!ser') || message.content.length < 50 || message.author.bot) {
       message.delete();
       return;
     }
