@@ -20,12 +20,12 @@ export default class Db {
     return await this.store.findOne({ userId });
   }
 
-  async saveOrUpdateCode(code: string, address: string): Promise<boolean> {
+  async saveOrUpdateCode(code: string, address: string, amount: string): Promise<boolean> {
     const doc = await this.store.findOne({ code });
     if (!doc) {
-      return !!(await this.store.insert({ code, address }));
+      return !!(await this.store.insert({ code, address, amount }));
     } else {
-      return !!(await this.store.update({ code }, { $set: { address } }));
+      return !!(await this.store.update({ code }, { $set: { address, amount } }));
     }
   }
 
