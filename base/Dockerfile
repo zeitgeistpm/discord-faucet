@@ -1,4 +1,4 @@
-FROM node:14-alpine 
+FROM node:18-alpine 
 RUN mkdir -p /discord-faucet && chown -R node:node /discord-faucet
 WORKDIR /discord-faucet
 COPY data_final.csv .

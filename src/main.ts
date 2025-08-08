@@ -1,5 +1,5 @@
 import { encodeAddress, decodeAddress } from '@polkadot/keyring';
-import Discord from 'discord.js';
+import { Client, GatewayIntentBits, Events } from 'discord.js';
 
 import { readConfig } from './config';
 import Db from './db';
@@ -21,7 +21,12 @@ const checkAddress = (address): string | false => {
   const config = readConfig('main-config.toml');
   const db = new Db(config.database.path);
   const sender = await Sender.create(config.sender.endpoint, config.sender.seed);
-  const client = new Discord.Client();
+  const client = new Client({ 
+    intents: [
+      GatewayIntentBits.Guilds, 
+      GatewayIntentBits.GuildMessages
+    ] 
+  });
 
   const storedCodes = process.env.codes?.split(',');
   const activeCodes = [];
@@ -35,20 +40,26 @@ const checkAddress = (address): string | false => {
 
   let isProcessing = false;
 
-  client.on('ready', () => {
+  client.once(Events.ClientReady, () => {
     console.log('KingOfCoins is online!');
   });
 
   // Event listener for messages
-  client.on('message', async (message) => {
+  client.on(Events.MessageCreate, async (message) => {
     // Validate channel
-    if (message.channel.id !== config.discord.channel_id) return;
+    if (message.channelId !== config.discord.channel_id) return;
     // Do not self-process messages
     if (message.author.id === '1205221932740386896') return;
 
+    // Check if message content is available (requires MessageContent intent)
+    if (!message.content && message.author.id !== client.user?.id) {
+      console.warn("Message content unavailable - MessageContent intent may be required");
+      return;
+    }
+
     // Validate message pattern
     if (!message.content.startsWith('!ser') || message.content.length < 50 || message.author.bot) {
-      message.delete();
+      await message.delete().catch(() => {});
       return;
     }
 
@@ -59,7 +70,7 @@ const checkAddress = (address): string | false => {
     const address = message.content.split(' ')[1];
     const checkedAddress = checkAddress(address);
     if (!checkedAddress) {
-      message.channel.send(`I don't understand this address, ${message.author.username}... 😕`);
+      await message.channel.send(`I don't understand this address, ${message.author.username}... 😕`);
       return;
     }
 
@@ -67,14 +78,14 @@ const checkAddress = (address): string | false => {
     const promocode = message.content.split(' ')[2];
     const index = activeCodes.indexOf(promocode);
     if (index === -1) {
-      message.channel.send(`Invalid promocode, ${message.author.username}... 😕`);
+      await message.channel.send(`Invalid promocode, ${message.author.username}... 😕`);
       return;
     }
 
     // Validate promocode
     const entry = await db.getCode(promocode);
     if (entry) {
-      message.channel.send(`Promocode already used! 💼`);
+      await message.channel.send(`Promocode already used! 💼`);
       return;
     }
 
@@ -89,13 +100,13 @@ const checkAddress = (address): string | false => {
 
     // Validate response from polkadot-api
     if (!success) {
-      message.channel.send(`Sorry, something went wrong! Please try again...`);
+      await message.channel.send(`Sorry, something went wrong! Please try again...`);
       return;
     }
 
     // Add code redemption entry in db
     await db.saveOrUpdateCode(promocode, address, amount.toString());
-    message.channel.send(`Sent ${amount / 10 ** 10} ZBS to ${message.author.username} against ${promocode}! 🎉`);
+    await message.channel.send(`Sent ${amount / 10 ** 10} ZBS to ${message.author.username} against ${promocode}! 🎉`);
     return;
   });
 

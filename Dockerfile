@@ -1,32 +1,37 @@
-FROM node:16-alpine AS node
+FROM node:18-alpine AS node
 
 FROM node AS builder
-ADD package.json .
-ADD yarn.lock .
-RUN yarn install --frozen-lockfile
-ADD tsconfig.json .
-ADD src src
+WORKDIR /app
+RUN corepack enable
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
+COPY tsconfig.json ./
+COPY src ./src
 RUN yarn build
 
 FROM node AS deps
-ADD package.json .
-ADD yarn.lock .
-RUN yarn install --frozen-lockfile
+WORKDIR /app
+RUN corepack enable
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
 
-FROM node AS faucet
-COPY --from=deps package.json .
-COPY --from=deps yarn.lock .
-COPY --from=deps node_modules node_modules
-COPY --from=builder dist dist
+FROM node:18-alpine AS faucet
+WORKDIR /app
+RUN corepack enable
+COPY --from=deps /app/package.json /app/yarn.lock /app/.yarnrc.yml ./
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
 
 FROM faucet AS test-faucet
-ADD test-config.toml .
-ADD *test-faucet.db .
-ADD .env .
-CMD ["yarn",  "start:test"]
+COPY test-config.toml ./
+COPY .env ./
+# Create empty db file if it doesn't exist
+RUN touch test-faucet.db
+CMD ["yarn", "start:test"]
 
 FROM faucet AS main-faucet
-ADD main-config.toml .
-ADD *main-faucet.db .
-ADD .env .
-CMD ["yarn",  "start:main"]
+COPY main-config.toml ./
+COPY .env ./
+# Create empty db file if it doesn't exist  
+RUN touch main-faucet.db
+CMD ["yarn", "start:main"]

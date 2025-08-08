@@ -1,0 +1,52 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist
+*.tsbuildinfo
+
+# Testing
+test-blockchain-only.js
+generate-test-address.js
+debug-api.js
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Documentation
+*.md
+CLAUDE.md
+
+# Environment files (will be copied explicitly)
+.env.example
+.env.test
+
+# Database files (will be mounted as volumes)
+*.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp
+temp

@@ -1,15 +1,24 @@
 {
     "compilerOptions": {
-        "target": "es6",
+        "target": "ES2022",
         "module": "commonjs",
+        "lib": ["ES2022"],
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "declaration": true,
         "outDir": "dist",
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "strict": false,
+        "forceConsistentCasingInFileNames": true
     },
+    "include": [
+        "src/**/*"
+    ],
     "exclude": [
         "node_modules",
         "dist",

@@ -1,7 +1,7 @@
 import Nedb from 'nedb-promises';
 
 export default class Db {
-  private store: Nedb;
+  private store: Nedb<any>;
 
   constructor(dbPath: string) {
     this.store = Nedb.create(dbPath);
@@ -31,19 +31,5 @@ export default class Db {
 
   async getCode(code: string): Promise<{ address: string } | null> {
     return await this.store.findOne({ code });
-  }
-
-  // KSM Extension
-  async saveOrUpdateKSMAddress(ksmAddress: string, done: boolean): Promise<boolean> {
-    const doc = await this.store.findOne({ ksmAddress });
-    if (!doc) {
-      return !!(await this.store.insert({ ksmAddress, done }));
-    } else {
-      return !!(await this.store.update({ ksmAddress }, { $set: { done } }));
-    }
-  }
-
-  async getKSMAddress(ksmAddress: string): Promise<{ ksmAddress: string; done: boolean } | null> {
-    return await this.store.findOne({ ksmAddress });
   }
 }

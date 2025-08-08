@@ -1,6 +1,6 @@
 import { encodeAddress, decodeAddress } from "@polkadot/keyring";
 import axios from "axios";
-import Discord from "discord.js";
+import { Client, GatewayIntentBits, Events } from "discord.js";
 
 import { readConfig } from "./config";
 import Db from "./db";
@@ -27,22 +27,33 @@ const bigTeam = "789386070441590816";
   const db = new Db(config.database.path);
   const sender = await Sender.create(config.sender.endpoint, config.sender.seed);
 
-  const client = new Discord.Client();
+  const client = new Client({ 
+    intents: [
+      GatewayIntentBits.Guilds, 
+      GatewayIntentBits.GuildMessages
+    ] 
+  });
 
-  client.on("ready", () => {
+  client.once(Events.ClientReady, () => {
     console.log("Testnet Faucet is running");
   });
 
   // Create an event listener for messages
-  client.on("message", async (message) => {
+  client.on(Events.MessageCreate, async (message) => {
+    // Check if message content is available (requires MessageContent intent)
+    if (!message.content && message.author.id !== client.user?.id) {
+      console.warn("Message content unavailable - MessageContent intent may be required");
+      return;
+    }
+    
     if (message.content.startsWith("!drip")) {
-      if (message.channel.id == config.discord.channel_id) {
+      if (message.channelId == config.discord.channel_id) {
         const { id } = message.author;
 
         console.log(message.author)
-        const smTeam = await message.guild.roles.fetch(smallTeam);
-        const lgTeam = await message.guild.roles.fetch(bigTeam);
-        const isOnTeam = smTeam.members.has(id) || lgTeam.members.has(id);
+        // Check if user has team roles (without privileged intents, we check the message author's roles)
+        const member = message.member;
+        const isOnTeam = member?.roles.cache.has(smallTeam) || member?.roles.cache.has(bigTeam) || false;
         let amount = 10 ** 11
         if (isOnTeam) {
           const requestedAmount = message.content.split(" ")[2];
@@ -54,7 +65,7 @@ const bigTeam = "789386070441590816";
         const checkedAddress = checkAddress(address);
 
         if (!checkedAddress) {
-          message.channel.send(
+          await message.channel.send(
             `I don't understand this address, ${message.author.username}... 😕`
           );
           return;
@@ -77,18 +88,18 @@ const bigTeam = "789386070441590816";
             await db.saveOrUpdateUser(message.author.id, getNow());
 
             //console.log(amount);
-            message.channel.send(
+            await message.channel.send(
               `Sent ${amount / 10**10} ZBS to ${message.author.username}! 🎉`
             );
           } else {
-            message.channel.send(
+            await message.channel.send(
               `Sorry, something went wrong! Please try again...`
             );
           }
 
           return;
         } else {
-          message.channel.send(
+          await message.channel.send(
             `You already requested ZBS within the last 24 hours, ${
               message.author.username
             }! You can request again at ${isOkAt(entry.at).toUTCString()}.`
