@@ -1,11 +1,30 @@
-version: '3'
+version: '3.8'
 
 services:
-  discord-faucet:
-    container_name: discord-faucet
-    build: .
-    image: discord-faucet
-    restart: on-failure
-    volumes: 
-    - ${PWD}/config.toml:/discord-faucet/config.toml
-    command: yarn start
+  test-faucet:
+    container_name: zeitgeist-test-faucet
+    build:
+      context: .
+      target: test-faucet
+    image: zeitgeist-test-faucet
+    restart: unless-stopped
+    volumes:
+      - ./test-config.toml:/app/test-config.toml:ro
+      - ./test-faucet.db:/app/test-faucet.db
+      - ./.env:/app/.env:ro
+    environment:
+      - NODE_ENV=production
+
+  main-faucet:
+    container_name: zeitgeist-main-faucet
+    build:
+      context: .
+      target: main-faucet
+    image: zeitgeist-main-faucet
+    restart: unless-stopped
+    volumes:
+      - ./main-config.toml:/app/main-config.toml:ro
+      - ./main-faucet.db:/app/main-faucet.db
+      - ./.env:/app/.env:ro
+    environment:
+      - NODE_ENV=production

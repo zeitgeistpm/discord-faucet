@@ -1,24 +1,29 @@
-import SDK, { util } from "@zeitgeistpm/sdk";
+import { ApiPromise, WsProvider } from "@polkadot/api";
+import { Keyring } from "@polkadot/keyring";
+import { KeyringPair } from "@polkadot/keyring/types";
 
 export default class Sender {
-  private sdk: SDK;
-  private keypair;
+  private api: ApiPromise;
+  private keypair: KeyringPair;
 
-  constructor(sdk: SDK, seed: string) {
-    this.sdk = sdk;
-    this.keypair = util.signerFromSeed(seed);
+  constructor(api: ApiPromise, seed: string) {
+    this.api = api;
+    const keyring = new Keyring({ type: 'sr25519' });
+    this.keypair = keyring.addFromUri(seed);
   }
 
   static async create(endpoint: string, seed: string): Promise<Sender> {
-    const sdk = await SDK.initialize(endpoint);
-    return new Sender(sdk, seed);
+    const provider = new WsProvider(endpoint);
+    const api = await ApiPromise.create({ provider });
+    await api.isReady;
+    return new Sender(api, seed);
   }
 
   async sendTokens(dest: string, amount: string): Promise<boolean> {
     console.log(`Processing ${amount} for ${dest}`)
     return new Promise(async (resolve) => {
-      const unsub = await this.sdk.api.tx.balances
-        .transfer(dest, amount)
+      const unsub = await this.api.tx.balances
+        .transferAllowDeath(dest, amount)
         .signAndSend(this.keypair, ({ events = [], status }) => {
           if (status.isInBlock) {
             events.forEach(({ event: { data, method, section } }) => {
@@ -27,18 +32,12 @@ export default class Sender {
                 resolve(true);
               } else if (section === "system" && method === "ExtrinsicFailed") {
                 console.log(`Failed to send ${amount} to ${dest}!`);
-                const { index, error } = data.toJSON()[0].module;
-                try {
-                  const { errorName, documentation } = this.sdk.errorTable.getEntry(
-                    index,
-                    parseInt(error.substring(2, 4), 16)
-                  );
-                  console.log(`${errorName}: ${documentation}`);
-                } catch (err) {
-                  console.log(err);
-                } finally {
-                  resolve(false);
+                const errorData = data.toJSON() as any;
+                if (errorData && errorData[0] && errorData[0].module) {
+                  const { index, error } = errorData[0].module;
+                  console.log(`Error: index=${index}, error=${error}`);
                 }
+                resolve(false);
               }
             });
 
