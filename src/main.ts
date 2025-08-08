@@ -24,7 +24,9 @@ const checkAddress = (address): string | false => {
   const client = new Client({ 
     intents: [
       GatewayIntentBits.Guilds, 
-      GatewayIntentBits.GuildMessages
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+      GatewayIntentBits.GuildMembers
     ] 
   });
 
